@@ -1,12 +1,58 @@
-import { StyleSheet, Text, TextInput, TouchableOpacity, View,Image } from 'react-native'
-import React from 'react'
-import { AntDesign } from '@expo/vector-icons'; 
+import { StyleSheet, Text, TextInput, TouchableOpacity, View,Image,KeyboardAvoidingView } from 'react-native'
+import React, { useEffect, useState } from 'react'
+import { AntDesign } from '@expo/vector-icons';
+import {getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword} from 'firebase/auth';
+import {initializeApp} from 'firebase/app';
+import {firebaseConfig} from '../firebase'
+import { useNavigation } from '@react-navigation/native';
 
 
+export default function Login() {
 
-export default function login() {
-  return (
-    <View>
+
+const [email,setEmail] = useState('')
+const [password,setPassword] = useState('')
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+const navigation = useNavigation()
+
+useEffect(()=>{
+  const unsubscribe = auth.onAuthStateChanged(user=> {
+    if(user){
+      navigation.navigate("Mainpage")
+    }
+  })
+  return unsubscribe
+},[])
+
+
+const handleCreateAccount = () => {
+  createUserWithEmailAndPassword(auth, email, password)
+  .then(() => {
+    console.log('Account created!')
+    const user = userCredential.user;
+    console.log(user)
+  })
+  .catch(error => {console.log(error);})
+}
+
+const handleLogIn =()=>{
+  signInWithEmailAndPassword(auth,email,password)
+  .then(()=>{
+    console.log('Signed!')
+    const user = userCredential.user;
+    console.log(user)
+  })
+  .catch(error => {console.log(error);})
+}
+
+return (
+  <KeyboardAvoidingView
+  behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+  style={styles.container}>
+    <View style={{justifyContent:'center',alignItems:'center',flex:1}}>
         <Image style={styles.ımage}
         source={require('../image/1.jpg')}
         />
@@ -15,7 +61,11 @@ export default function login() {
         <View style={styles.main}>
         <View style={styles.textınput}>
         <TextInput style={{fontSize:12,fontWeight:'300'}} 
-        placeholder='Username or email address' />
+        placeholder='Username or E-mail'
+        value={email}
+        onChangeText = {text => setEmail(text)}
+        
+        />
         </View>
         </View>
      
@@ -24,31 +74,60 @@ export default function login() {
         <View style={styles.textınput}>
         <TextInput style={{fontSize:12,fontWeight:'300'}}
         placeholder='Password'
+        secureTextEntry
+        value={password}
+        onChangeText={text => setPassword(text)}
        />
         </View>
       </View>
-     <TouchableOpacity>
-      <View style={styles.logın}>
-        <View style={styles.main}>
-        <Text style={styles.text}>Sign In </Text>
-        </View>
+      
+      
+   
+      <View style={styles.login}>
+      <TouchableOpacity
+     onPress={handleLogIn}
+     >
+     <View style={[styles.main]}>
+   
+        <Text style={styles.text}>Log In </Text>
+        
+     
       </View>
       </TouchableOpacity>
-      <View>
+      </View>
+      
+      <View style={{marginTop:30}}>
+
       <TouchableOpacity>
-        <View style={{marginTop:15,alignItems:'center'}}>
+        <View style={{alignItems:'center'}}>
           <Text style={{fontSize:12,fontWeight:'300'}}>Forgot Password?</Text>
         </View>
       </TouchableOpacity>
       </View>
-      <View style={{flexDirection:'row',justifyContent:'space-between',backgroundColor:'pink'}}>
-        <View >
-        <AntDesign name="googleplus" size={24} color="black" />
-        <Text>Sign In with Google </Text>
+      
+      
+      <View style={{alignItems:'center',justifyContent:'center'}}>
+      <TouchableOpacity>
+        <View style={styles.google} >
+        <AntDesign name="googleplus" size={24} color="black" style={{marginLeft:10}} />
+        <Text style={{marginRight:50,}}>Sign In with Google </Text>
         </View>
-
+        </TouchableOpacity>
+        </View>
+      
+      <View style={{flexDirection:'row',marginTop:30,justifyContent:'center'}}>
+        <View>
+          <Text style={{fontSize:12}}>Don’t have an account? </Text>
+        </View>
+        <TouchableOpacity>
+        <View>
+          <Text style={{fontSize:12,color:'blue'}}>Create One</Text>
+        </View>
+        </TouchableOpacity>
       </View>
+
     </View>
+    </KeyboardAvoidingView>
   )
 }
 
@@ -63,14 +142,16 @@ const styles = StyleSheet.create({
     marginTop:10,
 
   },
-  logın:{
-    marginTop:30,
-    width:'100%',
+  login:{
     backgroundColor:'#C13061',
-    alignContent:'center',
     justifyContent:'center',
     borderRadius:5,
     padding:2,
+    alignItems:'center',
+    width:'60%',
+    marginTop:30,
+    
+    
 
 
   },
@@ -78,23 +159,35 @@ const styles = StyleSheet.create({
     color:'white',
     fontStyle:'Raleway',
     fontSize:16,
+    width:'100%',
+    
   },
   main:{
     justifyContent:'center',
     alignItems:'center',
+    width:'60%'
 
   },
   ımage:{
     width:253,
     height:158,
+    alignItems:'center',
+    justifyContent:'center',
+    backgroundColor:'pink'
   },
   google:{
-    marginTop:30,
-    width:'100%',
-    backgroundColor:'rgba(236, 236, 236, 0.5)',
+    width:'55%',
+    backgroundColor:'#E4E4E4',
     borderRadius:5,
     padding:2,
-    flexDirection:'row',   
+    flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems:'center',
+    marginTop:50,
+
+  },
+  container:{
+    flex:1,
 
   }
   
